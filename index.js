@@ -333,6 +333,8 @@ exports.fromConfig = function (config, cb) {
       .use(require('./plugins/invite'))
       .use(require('./plugins/friends'))
 
+    if (config['torrent-dht'])
+      sbot.use(require('./plugins/torrent-dht'))
     if (config.local)
       sbot.use(require('./plugins/local'))
     if (config.phoenix)
