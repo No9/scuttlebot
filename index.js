@@ -155,6 +155,7 @@ exports = module.exports = function (config, ssb, feed) {
   server.connect = function (address, cb) {
     var rpc = attachSession(net.connect(toAddress(address)), false, cb)
     server.emit('log:info', ['sbot', rpc._sessid, 'connect', address])
+    server.emit('server:connect', address)
     return rpc
   }
 
