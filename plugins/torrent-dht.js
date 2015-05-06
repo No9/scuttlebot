@@ -2,7 +2,7 @@
 var DHT = require('bittorrent-dht')
 
 var port = 8009
-
+var isBootstrapped = false;
 function isFunction (f) {
   return 'function' === typeof f
 }
@@ -40,23 +40,33 @@ exports.init = function (sbot) {
     })
 
     dht.on('error', function() {
-    	sbot.emit('log:wann', ['sbot', null, that.name, 'torrent-dht error: ' + err])
+    	sbot.emit('log:warn', ['sbot', null, that.name, 'torrent-dht error: ' + err])
     })
 
-    sbot.on('server:connect', function(address){
-		
+    //sbot.on('server:connect', function(address){
+	sbot.on('rpc:connect', function(server){
+
+        var address = server._remoteAddress;
 		//This is ripped from api.js so should probably be refactored into util.js
 		//It also doesn't catch the local LAN IP address 
-	    if (address.host == '127.0.0.1' || address.host == '::ffff:127.0.0.1') {
+	    if (address == '127.0.0.1' || address == '::ffff:127.0.0.1') {
 		  return;
         }
 
         //Also needs validating when --host is set at the commandline. 
-        if (address.host == sbot.config.host) {
+        if (address == sbot.config.host) {
 		 	return;
-		}	
-
-        //This currently fails due to https://github.com/feross/bittorrent-dht/issues/47 
-        dht.addNode(address.host);
+		}
+     
+        //Temp bootstrap management
+        if(!isBootstrapped) {
+            //Is there a better way to get the remote address than this?
+            var addParse = address.replace('ws://', '')
+            address = addParse.substring(0, addParse.lastIndexOf(':')) 
+            
+            sbot.emit('log:info', ['sbot', null, that.name, 'torrent-dht bootstraping on ' + address])
+            dht.addNode(address + ':8009');
+            isBootstrapped = true;
+        }
     })
 }

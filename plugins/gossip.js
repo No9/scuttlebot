@@ -176,7 +176,6 @@ module.exports = {
     }
 
     function connectTo (p) {
-
       p.time = p.time || {}
       if (!p.time.connect)
         p.time.connect = 0
@@ -185,7 +184,6 @@ module.exports = {
       
       var rpc = server.connect(p)
       rpc._peer = p
-      console.log("HELLO " + p)
       rpc.on('remote:authorized', function () {
         p.id = rpc.authorized.id
         p.time = p.time || {}
